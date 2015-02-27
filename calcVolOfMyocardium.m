@@ -6,32 +6,30 @@ function [vol,mask] = calcVolOfMyocardium( p )
 % (a) Center :p(1),p(2)
 % (b) Blood pool activity; p(3)
 % (c) Background activity; p(4)
-% For each segment in myocardium (8 segments):
-% The 1st segment
-%(d)Central point radius on endocardium  p(5) 
-%(f)Thickness p(6)
-%(e)Myocardium activity p(7) 
-% The qth segment: p(5+3*(q-1):7+3*(q-1))
+% (d) Endocardium radii and corresponding myocaridum thicknesses(#=nRad):
+%     [p(5),p(6)] --> [p(5+2*(nRad-1), p(6+2*(nRad-1)]
+% (e) Activities of myocardium segments (#=nSeg):
+%  p(4+2*nRad+1)-->p(4+2*nRad+nSeg)
+
 global dimX;
 global dimY;
-global nseg;
-global dAng;
-global hdAng;
-inPts=zeros(2,nseg+1);
-outPts=zeros(2,nseg+1);
+global nRad;
+global rAng; 
+global hrAng; 
 
-for k=1:nseg
-    ang=hdAng+dAng*(k-1);
-    inPts(1,k)=p(1)+ p(5+3*(k-1))*cos(ang);
-    inPts(2,k)=p(2)+ p(5+3*(k-1))*sin(ang);
-    outPts(1,k)=p(1)+ (p(5+3*(k-1))+p(6+3*(k-1)))*cos(ang);
-    outPts(2,k)=p(2)+ (p(5+3*(k-1))+p(6+3*(k-1)))*sin(ang);   
+inPts=zeros(2,nRad+1);
+outPts=zeros(2,nRad+1);
+for k=1:nRad
+    ang=hrAng+rAng*(k-1);
+    inPts(1,k)=p(1)+ p(5+2*(k-1))*cos(ang);
+    inPts(2,k)=p(2)+ p(5+2*(k-1))*sin(ang);
+    outPts(1,k)=p(1)+ (p(5+2*(k-1))+p(6+2*(k-1)))*cos(ang);
+    outPts(2,k)=p(2)+ (p(5+2*(k-1))+p(6+2*(k-1)))*sin(ang);   
 end
 inPts(:,end)=inPts(:,1);
 outPts(:,end)=outPts(:,1);
 inCurve=fnplt(cscvn(inPts));
 outCurve=fnplt(cscvn(outPts));
-
 
 inMask=poly2mask(inCurve(1,:),inCurve(2,:),dimY,dimX);
 outMask=poly2mask(outCurve(1,:),outCurve(2,:),dimY,dimX);
